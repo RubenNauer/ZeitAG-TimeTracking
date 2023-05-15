@@ -9,6 +9,9 @@ Dabei sollte Schritt für Schritt vorgegangen werden, um einen guten Einblick in
 1. Klone/Kopiere dieses Repo in deinen eigenen GitHub Account 
 2. Installiere deine bevorzugte Entwicklungsumgebung (Visual Studio, VSCode, JetBrains Rider)
 3. Erstelle einen eigenen Branch und codiere Schritt für Schritt deine Lösung
+4. Dokumentiere deine Schritte in Form von Kommentaren im Code
+5. Es muss keine perfekte Lösung sein, pragmatische Denkweise ist genauso wichtig.
+6. Fragen kannst du per Mail an entwicklung@zeitag.ch senden.
 
 
 ### Features zum Umsetzen:
