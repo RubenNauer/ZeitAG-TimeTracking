@@ -6,12 +6,13 @@
 > Das Ziel ist eine einfache Zeiterfassung Fullstack zu entwerfen.
 Dabei sollte Schritt für Schritt vorgegangen werden, um einen guten Einblick in die Vorgehensweise aufzuzeigen.
 
-1. Klone/Kopiere dieses Repo in deinen eigenen GitHub Account 
+1. Klone/Kopiere dieses Repo in deinen eigenen GitHub Account:
+   ><img src="import-repo.png">
 2. Installiere deine bevorzugte Entwicklungsumgebung (Visual Studio, VSCode, JetBrains Rider)
 3. Erstelle einen eigenen Branch und codiere Schritt für Schritt deine Lösung
 4. Dokumentiere deine Schritte in Form von Kommentaren im Code
 5. Es muss keine perfekte Lösung sein, pragmatische Denkweise ist genauso wichtig.
-6. Fragen kannst du per Mail an entwicklung@zeitag.ch senden.
+6. Fragen kannst direkt hier stellen: https://github.com/timzeitag/timetracking-template/discussions
 
 
 ### Features zum Umsetzen:
@@ -44,16 +45,16 @@ Die neue Ansicht soll in einer eigenen Komponente erstellt werden.
 Hinweise für das Datenmodell zur Anzeige:
 
 #### Modell für "*TimeTracking*":
-- *Start of Record Date* / Time UTC
-- *End of Record* / Time UTC
-- *Short Description* / string
-- *Type* / int (Referenz zu BookingTypes)
+- *Start of Record* DateTime UTC
+- *End of Record* DateTime UTC
+- *Short Description* string
+- *Type* int (> Referenz zu *BookingTypes*)
 
 #### Modell für "*BookingTypes*"
-- BookingTypeId / int
-- Description / string
+- *BookingTypeId* int
+- *Description* string
 
-#### Einträge für *BookingTypes*, mit ID:
+#### Einträge für *BookingTypes.Description*, mit ID:
 - Präsenzzeit (0)
 - Pause (1)
 - Krankheit oder Unfall (2)
@@ -65,10 +66,6 @@ Hinweise für das Datenmodell zur Anzeige:
 * [ASP.NET Core 7](https://docs.microsoft.com/en-us/aspnet/core/introduction-to-aspnet-core)
 * [Entity Framework Core 7](https://docs.microsoft.com/en-us/ef/core/)
 * [Angular 14](https://angular.io/)
-* [MediatR](https://github.com/jbogard/MediatR)
-* [AutoMapper](https://automapper.org/)
-* [FluentValidation](https://fluentvalidation.net/)
-* [NUnit](https://nunit.org/), [FluentAssertions](https://fluentassertions.com/), [Moq](https://github.com/moq) & [Respawn](https://github.com/jbogard/Respawn)
 
 ## Wie starte ich?
 
