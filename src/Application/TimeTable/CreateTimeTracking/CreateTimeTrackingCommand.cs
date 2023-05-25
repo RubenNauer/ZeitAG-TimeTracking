@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using zeitag_grid_init.Application.Common.Interfaces;
+using zeitag_grid_init.Application.TimeTable.Queries;
 using zeitag_grid_init.Domain.Entities;
 using zeitag_grid_init.Domain.Enums;
 using zeitag_grid_init.Domain.Events;
@@ -17,6 +18,10 @@ public class CreateTimeTrackingCommand : IRequest<int>
     public DateTime EndOfRecord { get; set; }
     public string? ShortDescription { get; set; }
     public BookingType Type { get; set; }
+
+    // temporär für web-api-client.ts Generierung
+    public TimeTracking TimeTracking { get; set; }
+    public TimeTrackingDto TimeTrackingDto { get; set; }
 }
 
 public class CreateTimeTrackingCommandHandler : IRequestHandler<CreateTimeTrackingCommand, int>

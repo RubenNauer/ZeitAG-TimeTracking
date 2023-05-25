@@ -15,6 +15,77 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 
 export const API_BASE_URL = new InjectionToken<string>('API_BASE_URL');
 
+export interface ITimeTrackingClient {
+    create(command: CreateTimeTrackingCommand): Observable<number>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class TimeTrackingClient implements ITimeTrackingClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    create(command: CreateTimeTrackingCommand): Observable<number> {
+        let url_ = this.baseUrl + "/api/TimeTracking";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<number>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<number>;
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
 export interface ITodoItemsClient {
     getTodoItemsWithPagination(listId: number | undefined, pageNumber: number | undefined, pageSize: number | undefined): Observable<PaginatedListOfTodoItemBriefDto>;
     create(command: CreateTodoItemCommand): Observable<number>;
@@ -614,6 +685,241 @@ export class TodoListsClient implements ITodoListsClient {
         }
         return _observableOf(null as any);
     }
+}
+
+export class CreateTimeTrackingCommand implements ICreateTimeTrackingCommand {
+    startOfRecord?: Date;
+    endOfRecord?: Date;
+    shortDescription?: string | undefined;
+    type?: BookingType;
+    timeTracking?: TimeTracking;
+    timeTrackingDto?: TimeTrackingDto;
+
+    constructor(data?: ICreateTimeTrackingCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.startOfRecord = _data["startOfRecord"] ? new Date(_data["startOfRecord"].toString()) : <any>undefined;
+            this.endOfRecord = _data["endOfRecord"] ? new Date(_data["endOfRecord"].toString()) : <any>undefined;
+            this.shortDescription = _data["shortDescription"];
+            this.type = _data["type"];
+            this.timeTracking = _data["timeTracking"] ? TimeTracking.fromJS(_data["timeTracking"]) : <any>undefined;
+            this.timeTrackingDto = _data["timeTrackingDto"] ? TimeTrackingDto.fromJS(_data["timeTrackingDto"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): CreateTimeTrackingCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateTimeTrackingCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["startOfRecord"] = this.startOfRecord ? this.startOfRecord.toISOString() : <any>undefined;
+        data["endOfRecord"] = this.endOfRecord ? this.endOfRecord.toISOString() : <any>undefined;
+        data["shortDescription"] = this.shortDescription;
+        data["type"] = this.type;
+        data["timeTracking"] = this.timeTracking ? this.timeTracking.toJSON() : <any>undefined;
+        data["timeTrackingDto"] = this.timeTrackingDto ? this.timeTrackingDto.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface ICreateTimeTrackingCommand {
+    startOfRecord?: Date;
+    endOfRecord?: Date;
+    shortDescription?: string | undefined;
+    type?: BookingType;
+    timeTracking?: TimeTracking;
+    timeTrackingDto?: TimeTrackingDto;
+}
+
+export enum BookingType {
+    PresenceTime = 0,
+    Break = 1,
+    IllnessOrAccident = 2,
+    PaidAbsence = 3,
+    UnpaidAbsence = 4,
+}
+
+export abstract class BaseEntity implements IBaseEntity {
+    id?: number;
+    domainEvents?: BaseEvent[];
+
+    constructor(data?: IBaseEntity) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            if (Array.isArray(_data["domainEvents"])) {
+                this.domainEvents = [] as any;
+                for (let item of _data["domainEvents"])
+                    this.domainEvents!.push(BaseEvent.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BaseEntity {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseEntity' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        if (Array.isArray(this.domainEvents)) {
+            data["domainEvents"] = [];
+            for (let item of this.domainEvents)
+                data["domainEvents"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IBaseEntity {
+    id?: number;
+    domainEvents?: BaseEvent[];
+}
+
+export class TimeTracking extends BaseEntity implements ITimeTracking {
+    startOfRecord?: Date;
+    endOfRecord?: Date;
+    shortDescription?: string | undefined;
+    type?: BookingType;
+
+    constructor(data?: ITimeTracking) {
+        super(data);
+    }
+
+    override init(_data?: any) {
+        super.init(_data);
+        if (_data) {
+            this.startOfRecord = _data["startOfRecord"] ? new Date(_data["startOfRecord"].toString()) : <any>undefined;
+            this.endOfRecord = _data["endOfRecord"] ? new Date(_data["endOfRecord"].toString()) : <any>undefined;
+            this.shortDescription = _data["shortDescription"];
+            this.type = _data["type"];
+        }
+    }
+
+    static override fromJS(data: any): TimeTracking {
+        data = typeof data === 'object' ? data : {};
+        let result = new TimeTracking();
+        result.init(data);
+        return result;
+    }
+
+    override toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["startOfRecord"] = this.startOfRecord ? this.startOfRecord.toISOString() : <any>undefined;
+        data["endOfRecord"] = this.endOfRecord ? this.endOfRecord.toISOString() : <any>undefined;
+        data["shortDescription"] = this.shortDescription;
+        data["type"] = this.type;
+        super.toJSON(data);
+        return data;
+    }
+}
+
+export interface ITimeTracking extends IBaseEntity {
+    startOfRecord?: Date;
+    endOfRecord?: Date;
+    shortDescription?: string | undefined;
+    type?: BookingType;
+}
+
+export abstract class BaseEvent implements IBaseEvent {
+
+    constructor(data?: IBaseEvent) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): BaseEvent {
+        data = typeof data === 'object' ? data : {};
+        throw new Error("The abstract class 'BaseEvent' cannot be instantiated.");
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IBaseEvent {
+}
+
+export class TimeTrackingDto implements ITimeTrackingDto {
+    id?: number;
+    startOfRecord?: Date;
+    endOfRecord?: Date;
+    shortDescription?: string | undefined;
+    type?: BookingType;
+
+    constructor(data?: ITimeTrackingDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.startOfRecord = _data["startOfRecord"] ? new Date(_data["startOfRecord"].toString()) : <any>undefined;
+            this.endOfRecord = _data["endOfRecord"] ? new Date(_data["endOfRecord"].toString()) : <any>undefined;
+            this.shortDescription = _data["shortDescription"];
+            this.type = _data["type"];
+        }
+    }
+
+    static fromJS(data: any): TimeTrackingDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new TimeTrackingDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["startOfRecord"] = this.startOfRecord ? this.startOfRecord.toISOString() : <any>undefined;
+        data["endOfRecord"] = this.endOfRecord ? this.endOfRecord.toISOString() : <any>undefined;
+        data["shortDescription"] = this.shortDescription;
+        data["type"] = this.type;
+        return data;
+    }
+}
+
+export interface ITimeTrackingDto {
+    id?: number;
+    startOfRecord?: Date;
+    endOfRecord?: Date;
+    shortDescription?: string | undefined;
+    type?: BookingType;
 }
 
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {
