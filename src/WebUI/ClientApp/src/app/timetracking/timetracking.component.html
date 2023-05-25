@@ -58,25 +58,23 @@
   </div>
 </ng-template>
 
-<div *ngIf="selectedDate instanceof Date && !isNaN(selectedDate.getTime())">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Beginn</th>
-        <th>Ende</th>
-        <th>Zeit</th>
-        <th>Bezeichnung</th>
-        <th>Typ</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of timeTrackings">
-        <td>{{ item.startOfRecord | date: 'dd.MM.yyyy HH:mm' }}</td>
-        <td>{{ item.endOfRecord | date: 'dd.MM.yyyy HH:mm' }}</td>
-        <td>{{ calculateTime(item.startOfRecord, item.endOfRecord) }}</td>
-        <td>{{ item.shortDescription }}</td>
-        <td>{{ getBookingTypeLabel(item.type) }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Beginn</th>
+      <th>Ende</th>
+      <th>Zeit</th>
+      <th>Bezeichnung</th>
+      <th>Typ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of timeTrackings">
+      <td>{{ item.startOfRecord | date: 'dd.MM.yyyy HH:mm' }}</td>
+      <td>{{ item.endOfRecord | date: 'dd.MM.yyyy HH:mm' }}</td>
+      <td>{{ calculateTime(item.startOfRecord, item.endOfRecord) }}</td>
+      <td>{{ item.shortDescription }}</td>
+      <td>{{ getBookingTypeLabel(item.type) }}</td>
+    </tr>
+  </tbody>
+</table>
