@@ -1,1 +1,55 @@
-<p>timetracking works!</p>
+<h1>Zeiterfassung</h1>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-6">
+      <label for="datepicker">Wähen Sie einen Tag aus:</label>
+      <input type="text" class="form-control" placeholder="Tag auswählen / eingeben (TT.MM.YYYY)" id="datepicker" bsDatepicker [(ngModel)]="selectedDate" [bsConfig]="{ dateInputFormat: 'DD.MM.YYYY' }">
+    </div>
+  </div>
+</div>
+
+<button *ngIf="selectedDate instanceof Date && !isNaN(selectedDate.getTime())" class="btn btn-default" title="Zeit erfassen"
+        (click)="showCreateTimeTrackingModal(newTimeTrackingModalTemplate)">
+  <i class="bi bi-plus-square"></i>
+  Zeit erfassen
+</button>
+
+<ng-template #newTimeTrackingModalTemplate>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Zeit erfassen für {{ selectedDate | date:'dd.MM.YYYY' }}</h4>
+    <button type="button" class="close btn-close pull-right" aria-label="Close" (click)="newTimeTrackingCancelled()">
+      <span aria-hidden="true" class="visually-hidden">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="startOfRecord">Beginn</label>
+      <timepicker [(ngModel)]="selectedStartTime" id="startOfRecord" [showMeridian]="false"
+                  [ngClass]="{ 'is-invalid': newTimeTrackingEditor.error }" (keyup.enter)="createTimeTracking()"></timepicker>
+      <label for="endOfRecord">Ende</label>
+      <timepicker [(ngModel)]="selectedEndTime" id="endOfRecord" [showMeridian]="false"
+                  [ngClass]="{ 'is-invalid': newTimeTrackingEditor.error }" (keyup.enter)="createTimeTracking()"></timepicker>
+      <label for="shortDescription">Bezeichnung</label>
+      <input type="text" class="form-control" id="shortDescription" placeholder="Bezeichnung" [(ngModel)]="newTimeTrackingEditor.shortDescription"
+             [ngClass]="{ 'is-invalid': newTimeTrackingEditor.error }" (keyup.enter)="createTimeTracking()" />
+      <label for="bookingTypeSelect">Typ</label>
+      <select [(ngModel)]="selectedBookingType" class="form-control" id="bookingTypeSelect">
+        <option *ngFor="let type of bookingTypes" [value]="type.value">{{ type.label }}</option>
+      </select>
+
+      <div *ngIf="newTimeTrackingEditor.error" class="invalid-feedback">
+        {{ newTimeTrackingEditor.error }}
+      </div>
+    </div>
+    <div *ngIf="debug">
+      <pre>{{ newTimeTrackingEditor | json }}</pre>
+    </div>
+  </div>
+  <div class="modal-footer clearfix">
+    <div class="float-end">
+      <button class="btn btn-default" (click)="newTimeTrackingCancelled()">Cancel</button>
+      <button class="btn btn-primary" (click)="createTimeTracking()">Create</button>
+    </div>
+  </div>
+</ng-template>
