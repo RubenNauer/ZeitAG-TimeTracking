@@ -3,12 +3,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { AuthorizeGuard } from '../api-authorization/authorize.guard';
 import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
+import { TimetrackingComponent } from './timetracking/timetracking.component';
 import { TodoComponent } from './todo/todo.component';
 import { TokenComponent } from './token/token.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
   { path: 'counter', component: CounterComponent },
+  { path: 'timetracking', component: TimetrackingComponent },
   { path: 'todo', component: TodoComponent, canActivate: [AuthorizeGuard] },
   { path: 'token', component: TokenComponent, canActivate: [AuthorizeGuard] }
 ];
