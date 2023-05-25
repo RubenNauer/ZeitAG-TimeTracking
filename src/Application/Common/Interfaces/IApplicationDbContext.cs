@@ -9,5 +9,8 @@ public interface IApplicationDbContext
 
     DbSet<TodoItem> TodoItems { get; }
 
+    // DbSet für die neue Datenbanktabelle "TimeTrackings" in der Schnittstelle
+    DbSet<TimeTracking> TimeTrackings { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
