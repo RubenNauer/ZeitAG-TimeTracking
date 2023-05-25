@@ -31,12 +31,30 @@ export class TimetrackingComponent implements OnInit {
     { value: BookingType.UnpaidAbsence, label: 'Unbezahlte Absenz' },
   ];
 
+
   constructor(
     private timeTrackingClient: TimeTrackingClient,
     private modalService: BsModalService
   ) { }
 
+  // Aufruf beim Initialisieren
   ngOnInit(): void {
+    this.selectedDate = new Date();
+    this.timeTrackingClient.get(this.selectedDate).subscribe(
+      result => {
+        this.timeTrackings = result;
+      },
+      error => console.error(error)
+    );
+  }
+  // Aufruf beim Wechsel einer Value
+  onDateChange(): void {
+    this.timeTrackingClient.get(this.selectedDate).subscribe(
+      result => {
+        this.timeTrackings = result;
+      },
+      error => console.error(error)
+    );
   }
 
   // Methode fürs Anzeigen des Pop-Ups
@@ -83,5 +101,48 @@ export class TimetrackingComponent implements OnInit {
         setTimeout(() => document.getElementById('title').focus(), 250);
       }
     );
+  }
+
+  // Für die Tabelle
+  getBookingTypeLabel(type: BookingType): string {
+    switch (type) {
+      case BookingType.PresenceTime:
+        return 'Präsenzzeit';
+      case BookingType.Break:
+        return 'Pause';
+      case BookingType.IllnessOrAccident:
+        return 'Krankheit oder Unfall';
+      case BookingType.PaidAbsence:
+        return 'Bezahlte Absenz';
+      case BookingType.UnpaidAbsence:
+        return 'Unbezahlte Absenz';
+      default:
+        return '';
+    }
+  }
+
+  // Berechnung zwischen Start und Ende
+  calculateTime(start: Date, end: Date): string {
+    const startTime = start.getTime();
+    const endTime = end.getTime();
+    const timeDifference = endTime - startTime;
+
+    // Herunterrunden
+    const hours = Math.floor(timeDifference / 3600000);
+    const minutes = Math.floor((timeDifference % 3600000) / 60000);
+
+    const formattedHours = this.padNumber(hours, 2);
+    const formattedMinutes = this.padNumber(minutes, 2);
+
+    return `${formattedHours}:${formattedMinutes}`;
+  }
+
+  // Auffüllung der Nullen (0) 
+  private padNumber(number: number, length: number): string {
+    let str = number.toString();
+    while (str.length < length) {
+      str = '0' + str;
+    }
+    return str;
   }
 }

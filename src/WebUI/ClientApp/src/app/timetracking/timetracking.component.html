@@ -4,16 +4,20 @@
   <div class="row">
     <div class="col-md-6">
       <label for="datepicker">Wähen Sie einen Tag aus:</label>
-      <input type="text" class="form-control" placeholder="Tag auswählen / eingeben (TT.MM.YYYY)" id="datepicker" bsDatepicker [(ngModel)]="selectedDate" [bsConfig]="{ dateInputFormat: 'DD.MM.YYYY' }">
+      <input type="text" class="form-control" placeholder="Tag auswählen / eingeben (TT.MM.YYYY)" id="datepicker" bsDatepicker [(ngModel)]="selectedDate" [bsConfig]="{ dateInputFormat: 'DD.MM.YYYY' }" (ngModelChange)="onDateChange()">
     </div>
   </div>
 </div>
 
-<button *ngIf="selectedDate instanceof Date && !isNaN(selectedDate.getTime())" class="btn btn-default" title="Zeit erfassen"
+<br />
+
+<button class="btn btn-default" title="Zeit erfassen"
         (click)="showCreateTimeTrackingModal(newTimeTrackingModalTemplate)">
   <i class="bi bi-plus-square"></i>
   Zeit erfassen
 </button>
+
+<br />
 
 <ng-template #newTimeTrackingModalTemplate>
   <div class="modal-header">
@@ -53,3 +57,26 @@
     </div>
   </div>
 </ng-template>
+
+<div *ngIf="selectedDate instanceof Date && !isNaN(selectedDate.getTime())">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Beginn</th>
+        <th>Ende</th>
+        <th>Zeit</th>
+        <th>Bezeichnung</th>
+        <th>Typ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of timeTrackings">
+        <td>{{ item.startOfRecord | date: 'dd.MM.yyyy HH:mm' }}</td>
+        <td>{{ item.endOfRecord | date: 'dd.MM.yyyy HH:mm' }}</td>
+        <td>{{ calculateTime(item.startOfRecord, item.endOfRecord) }}</td>
+        <td>{{ item.shortDescription }}</td>
+        <td>{{ getBookingTypeLabel(item.type) }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
