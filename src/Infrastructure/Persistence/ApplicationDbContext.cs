@@ -31,6 +31,10 @@ public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, 
 
     public DbSet<TodoItem> TodoItems => Set<TodoItem>();
 
+    // DbSet für die neue Datenbanktabelle "TimeTrackings"
+
+    public DbSet<TimeTracking> TimeTrackings => Set<TimeTracking>();
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
